@@ -538,3 +538,25 @@ export function validateAdminPassword(username: string, password: string): boole
   if (!admin) return false;
   return bcryptjs.compareSync(password, admin.password_hash);
 }
+
+export function updateAdminCredentials(
+  currentUsername: string,
+  newUsername: string,
+  newPassword: string
+): { success: boolean; error?: string } {
+  try {
+    const db2 = getDb();
+    const hash = bcryptjs.hashSync(newPassword, 10);
+    const result = db2
+      .prepare(
+        "UPDATE admin_users SET username = ?, password_hash = ? WHERE username = ?"
+      )
+      .run(newUsername, hash, currentUsername);
+    if (result.changes === 0) return { success: false, error: "Kullanıcı bulunamadı." };
+    return { success: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Bilinmeyen hata.";
+    return { success: false, error: msg };
+  }
+}
+

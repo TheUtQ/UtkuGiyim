@@ -1077,9 +1077,89 @@ function SettingsTab({
       ))}
 
       <AdminBtn onClick={handleSave} icon={<Save size={16} />} label={saving ? 'Kaydediliyor...' : 'Tüm Ayarları Kaydet'} disabled={saving} />
+
+      {/* ===== Hesap Güvenliği ===== */}
+      <AccountSecuritySection showToast={showToast} />
     </div>
   );
 }
+
+/* ===== Account Security (ayrı mini bileşen) ===== */
+function AccountSecuritySection({ showToast }: { showToast: (msg: string, type?: 'success' | 'error') => void }) {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newUsername, setNewUsername] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const handleUpdate = async () => {
+    if (!currentPassword || !newUsername || !newPassword) {
+      showToast('Tüm alanları doldurun.', 'error'); return;
+    }
+    if (newPassword !== confirmPassword) {
+      showToast('Yeni şifreler eşleşmiyor.', 'error'); return;
+    }
+    if (newPassword.length < 6) {
+      showToast('Şifre en az 6 karakter olmalı.', 'error'); return;
+    }
+    setSaving(true);
+    try {
+      const res = await fetch('/api/auth/account', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword, newUsername, newPassword }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showToast('Hesap bilgileri güncellendi! Tekrar giriş yapın.');
+        setCurrentPassword(''); setNewUsername(''); setNewPassword(''); setConfirmPassword('');
+        // Otomatik logout — yeni şifreyle giriş gereksin
+        setTimeout(async () => {
+          await fetch('/api/auth', { method: 'DELETE' });
+          window.location.href = '/admin';
+        }, 2000);
+      } else {
+        showToast(data.error || 'Güncelleme başarısız.', 'error');
+      }
+    } catch { showToast('Sunucu hatası.', 'error'); }
+    setSaving(false);
+  };
+
+  return (
+    <div style={{ background: 'rgba(230,51,41,0.05)', border: '1px solid rgba(230,51,41,0.2)', borderRadius: '16px', padding: '1.5rem' }}>
+      <h3 style={{ fontFamily: '"Outfit", sans-serif', fontWeight: 700, fontSize: '1rem', color: '#fff', paddingBottom: '1rem', marginBottom: '1rem', borderBottom: '1px solid rgba(230,51,41,0.15)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        🔐 Hesap Güvenliği
+      </h3>
+      <p style={{ fontSize: '0.78rem', color: '#666', marginBottom: '1.25rem', lineHeight: 1.6 }}>
+        Kullanıcı adı veya şifrenizi değiştirmek için önce mevcut şifrenizi girin. Değişiklik sonrası yeniden giriş yapmanız gerekecek.
+      </p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <FormField label="Mevcut Şifre *">
+          <AdminInput value={currentPassword} onChange={setCurrentPassword} placeholder="••••••••" type="password" />
+        </FormField>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <FormField label="Yeni Kullanıcı Adı *">
+            <AdminInput value={newUsername} onChange={setNewUsername} placeholder="admin" />
+          </FormField>
+          <div />
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <FormField label="Yeni Şifre *">
+            <AdminInput value={newPassword} onChange={setNewPassword} placeholder="En az 6 karakter" type="password" />
+          </FormField>
+          <FormField label="Yeni Şifre (Tekrar) *">
+            <AdminInput value={confirmPassword} onChange={setConfirmPassword} placeholder="••••••••" type="password" />
+          </FormField>
+        </div>
+        <div>
+          <AdminBtn onClick={handleUpdate} icon={<Save size={14} />} label={saving ? 'Güncelleniyor...' : 'Hesabı Güncelle'} disabled={saving} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 
 
 /* ===== UI PRIMITIVES ===== */

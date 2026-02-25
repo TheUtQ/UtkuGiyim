@@ -333,24 +333,8 @@ export default function LoginForm() {
               'Giriş Yap'
             )}
           </button>
-
-          {/* Hint */}
-          <div style={{
-            marginTop: '1.5rem',
-            padding: '0.75rem 1rem',
-            background: 'rgba(255,255,255,0.03)',
-            borderRadius: '10px',
-            border: '1px solid rgba(255,255,255,0.05)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-          }}>
-            <span style={{ fontSize: '0.75rem' }}>🔑</span>
-            <p style={{ color: '#555', fontSize: '0.75rem', lineHeight: 1.5 }}>
-              Varsayılan: <span style={{ color: '#888', fontFamily: 'monospace' }}>admin</span> / <span style={{ color: '#888', fontFamily: 'monospace' }}>admin123</span>
-            </p>
-          </div>
         </form>
+
 
         {/* Footer */}
         <p style={{
