@@ -1,36 +1,117 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Utku Giyim 🏍️
 
-## Getting Started
+Premium motosiklet sele kılıfları ve vites sweatshirtleri için e-ticaret + içerik yönetim sistemi.
 
-First, run the development server:
+## 🚀 Teknoloji Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **Veritabanı**: SQLite (`better-sqlite3`)
+- **Stil**: Vanilla CSS + CSS Variables (dark mode)
+- **Animasyonlar**: Framer Motion
+- **Dil**: TypeScript
+
+## 📦 Kurulum
 
 ```bash
+# Bağımlılıkları yükle
+npm install
+
+# Geliştirme sunucusunu başlat
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Uygulama `http://localhost:3000` adresinde çalışacak.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🗂️ Proje Yapısı
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/
+│   ├── page.tsx                  # Ana sayfa
+│   ├── urunler/                  # Ürün listesi ve detay sayfaları
+│   │   ├── page.tsx
+│   │   └── [slug]/page.tsx
+│   ├── admin/                    # Admin paneli
+│   │   ├── page.tsx
+│   │   └── dashboard/page.tsx
+│   └── api/                      # REST API rotaları
+│       ├── products/
+│       ├── brands/
+│       ├── categories/
+│       ├── settings/
+│       ├── seo-content/
+│       ├── auth/
+│       └── upload/
+├── components/
+│   ├── LandingClient.tsx         # Ana sayfa istemci bileşeni
+│   ├── ProductsClient.tsx        # Ürün listesi (filtreleme)
+│   ├── ProductDetailClient.tsx   # Ürün detay sayfası
+│   └── admin/
+│       ├── AdminDashboard.tsx    # Admin paneli
+│       └── LoginForm.tsx
+└── lib/
+    ├── db.ts                     # Veritabanı katmanı
+    └── auth.ts                   # Kimlik doğrulama
+```
 
-## Learn More
+## ✨ Özellikler
 
-To learn more about Next.js, take a look at the following resources:
+### 🌐 Ana Sayfa
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Parallax hero bölümü
+- **Mağazalarımız** modal → Shopier & Trendyol butonları (blur overlay)
+- Vizyonumuz bölümü (admin'den yönetilebilir)
+- Sele Kılıfı ve Vites Sweatshirt koleksiyonları (max 5 ürün)
+- Ürün özellikleri listesi (admin'den ekle/sil/düzenle)
+- SEO içerik accordion (SSS)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 🛍️ Ürünler
 
-## Deploy on Vercel
+- `/urunler` — kategori ve marka filtrelemeli ürün listesi
+- `/urunler/[slug]` — detaylı ürün sayfası
+- Her ürün: marka rozeti, fiyat, Shopier/Trendyol satın al butonları
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 🔧 Admin Paneli (`/admin/dashboard`)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Ürünler**: CRUD — görsel yükleme, marka seçimi (zorunlu), Shopier/Trendyol linkleri
+- **Marka & Kategori**: Tam yönetim — ekle, düzenle, sil
+- **SEO İçerik**: SSS ve içerik yönetimi
+- **Ayarlar**:
+  - Koleksiyon göster/gizle toggle'ları
+  - Vizyonumuz kartları (emoji + başlık + açıklama)
+  - Manifesto satırları (renk seçimi: kırmızı/mavi)
+  - Ürün özellikleri listesi
+  - Hero, iletişim, sosyal medya, mağaza linkleri
+
+### 🗄️ Veritabanı
+
+- `products` — ürünler (brand_id FK, extra_images)
+- `brands` — markalar
+- `categories` — kategoriler
+- `site_settings` — key-value ayarlar
+- `seo_content` — SSS içerikleri
+- `admin_users` — yönetici hesapları
+
+## 🔐 Varsayılan Admin Girişi
+
+```
+Kullanıcı adı: admin
+Şifre: admin123
+```
+
+> ⚠️ Production'a almadan önce şifreyi değiştirin!
+
+## 📝 Commit Kuralları
+
+Her değişiklik ayrı commit olarak eklenir. Format:
+
+```
+feat: yeni özellik açıklaması
+fix: hata düzeltme açıklaması
+style: görsel değişiklik açıklaması
+refactor: kod yeniden yapılandırması
+```
+
+---
+
+© 2024 Utku Giyim — Tüm hakları saklıdır.
