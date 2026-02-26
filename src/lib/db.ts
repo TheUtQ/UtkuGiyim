@@ -6,13 +6,18 @@ import Database from "better-sqlite3";
 import path from "path";
 import bcryptjs from "bcryptjs";
 
-const DB_PATH = path.join(process.cwd(), "data", "utkugiyim.db");
+// Vercel serverless ortamında sadece /tmp dizini yazılabilirdir
+const isVercel = process.env.VERCEL || process.env.VERCEL_ENV;
+const DB_PATH = isVercel
+  ? path.join("/tmp", "utkugiyim.db")
+  : path.join(process.cwd(), "data", "utkugiyim.db");
 
 import fs from "fs";
 const dataDir = path.dirname(DB_PATH);
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
+
 
 let db: Database.Database;
 
