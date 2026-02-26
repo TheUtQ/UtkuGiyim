@@ -95,8 +95,8 @@ src/
 ## 🔐 Varsayılan Admin Girişi
 
 ```
-Kullanıcı adı: admin
-Şifre: admin123
+Kullanıcı adı: ***********
+Şifre: ****************
 ```
 
 > ⚠️ Production'a almadan önce şifreyi değiştirin!
