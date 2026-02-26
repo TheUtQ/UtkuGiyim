@@ -15,6 +15,7 @@ export default function HomePage() {
     description: string;
     price: number;
     category: string;
+    brand_name: string;
     image_url: string;
     badge: string;
     badge_type: string | null;
