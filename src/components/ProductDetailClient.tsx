@@ -92,7 +92,21 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           <ArrowLeft size={16} /> Ürünlere Geri Dön
         </Link>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'start' }}>
+        <style>{`
+          .ug-detail-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2.5rem;
+            align-items: start;
+          }
+          @media (min-width: 768px) {
+            .ug-detail-grid {
+              grid-template-columns: 1fr 1fr;
+              gap: 4rem;
+            }
+          }
+        `}</style>
+        <div className="ug-detail-grid">
           {/* ======= LEFT: Image Gallery ======= */}
           <div>
             {/* Main image */}
@@ -111,6 +125,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   alt={product.title}
                   fill
                   priority
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   style={{ objectFit: 'contain', padding: '1.5rem' }}
                 />
               )}
@@ -142,7 +157,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                       padding: 0,
                     }}
                   >
-                    <Image src={img} alt={`Görsel ${i + 1}`} fill style={{ objectFit: 'contain', padding: '4px' }} />
+                    <Image src={img} alt={`Görsel ${i + 1}`} fill sizes="70px" style={{ objectFit: 'contain', padding: '4px' }} />
                   </button>
                 ))}
               </div>
