@@ -12,7 +12,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const product = getProductById(Number(id));
+    const product = await getProductById(Number(id));
     if (!product) {
       return NextResponse.json({ error: 'Ürün bulunamadı.' }, { status: 404 });
     }
@@ -36,7 +36,7 @@ export async function PUT(
 
     const { id } = await params;
     const data = await request.json();
-    updateProduct(Number(id), data);
+    await updateProduct(Number(id), data);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Product PUT error:', error);
@@ -56,7 +56,7 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    deleteProduct(Number(id));
+    await deleteProduct(Number(id));
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Product DELETE error:', error);

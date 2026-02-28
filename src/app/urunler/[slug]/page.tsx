@@ -7,13 +7,13 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  const products = getAllProducts() as { slug: string }[];
+  const products = (await getAllProducts()) as unknown as { slug: string }[];
   return products.map(p => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
-  const product = getProductBySlug(slug) as { title: string; description: string; brand_name: string } | undefined;
+  const product = (await getProductBySlug(slug)) as unknown as { title: string; description: string; brand_name: string } | undefined;
   if (!product) return { title: 'Ürün Bulunamadı' };
   return {
     title: `${product.brand_name ? product.brand_name + ' - ' : ''}${product.title} | Utku Giyim`,
@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function ProductDetailPage({ params }: Props) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
   if (!product) notFound();
 
   return <ProductDetailClient product={product as never} />;

@@ -9,9 +9,9 @@ export async function GET(request: NextRequest) {
     if (admin === 'true') {
       const session = await getSession();
       if (!session) return NextResponse.json({ error: 'Yetkisiz.' }, { status: 401 });
-      return NextResponse.json(getAllBrandsAdmin());
+      return NextResponse.json(await getAllBrandsAdmin());
     }
-    return NextResponse.json(getAllBrands());
+    return NextResponse.json(await getAllBrands());
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: 'Markalar alınamadı.' }, { status: 500 });
@@ -24,8 +24,8 @@ export async function POST(request: NextRequest) {
     if (!session) return NextResponse.json({ error: 'Yetkisiz.' }, { status: 401 });
     const data = await request.json();
     if (!data.name || !data.slug) return NextResponse.json({ error: 'İsim ve slug zorunlu.' }, { status: 400 });
-    const result = createBrand(data);
-    return NextResponse.json({ success: true, id: result.lastInsertRowid });
+    const id = await createBrand(data);
+    return NextResponse.json({ success: true, id });
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: 'Marka eklenemedi.' }, { status: 500 });
@@ -39,7 +39,7 @@ export async function PUT(request: NextRequest) {
     const data = await request.json();
     if (!data.id) return NextResponse.json({ error: 'ID zorunlu.' }, { status: 400 });
     const { id, ...rest } = data;
-    updateBrand(id, rest);
+    await updateBrand(id, rest);
     return NextResponse.json({ success: true });
   } catch (e) {
     console.error(e);
@@ -54,7 +54,7 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const id = parseInt(searchParams.get('id') || '0');
     if (!id) return NextResponse.json({ error: 'ID zorunlu.' }, { status: 400 });
-    deleteBrand(id);
+    await deleteBrand(id);
     return NextResponse.json({ success: true });
   } catch (e) {
     console.error(e);

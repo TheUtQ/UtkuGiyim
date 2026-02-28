@@ -7,8 +7,8 @@ import LandingClient from '@/components/LandingClient';
 
 export const dynamic = 'force-dynamic';
 
-export default function HomePage() {
-  const products = getAllProducts() as Array<{
+export default async function HomePage() {
+  const products = (await getAllProducts()) as unknown as Array<{
     id: number;
     title: string;
     slug: string;
@@ -22,8 +22,8 @@ export default function HomePage() {
     shopier_link: string;
     trendyol_link: string;
   }>;
-  const settings = getAllSettings();
-  const seoContent = getAllSeoContent() as Array<{
+  const settings = await getAllSettings();
+  const seoContent = (await getAllSeoContent()) as unknown as Array<{
     id: number;
     title: string;
     content: string;

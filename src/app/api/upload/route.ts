@@ -14,9 +14,10 @@ export async function POST(request: NextRequest) {
     }
 
     const formData = await request.formData();
-    const file = formData.get('file') as File;
+    const file = formData.get('file');
 
-    if (!file) {
+    // Make sure it's a File and not a string
+    if (!file || typeof file === 'string') {
       return NextResponse.json({ error: 'Dosya bulunamadı.' }, { status: 400 });
     }
 
@@ -33,16 +34,31 @@ export async function POST(request: NextRequest) {
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+    const base64Image = buffer.toString('base64');
 
-    // Generate unique filename
-    const ext = path.extname(file.name) || '.png';
-    const filename = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}${ext}`;
-    const uploadDir = path.join(process.cwd(), 'public', 'images', 'uploads');
+    // Upload to ImgBB
+    const apiKey = process.env.IMGBB_API_KEY;
+    if (!apiKey) {
+      console.error('IMGBB_API_KEY is missing');
+      return NextResponse.json({ error: 'Sunucu yapılandırma hatası (API Key eksik).' }, { status: 500 });
+    }
 
-    await mkdir(uploadDir, { recursive: true });
-    await writeFile(path.join(uploadDir, filename), buffer);
+    const imgbbData = new FormData();
+    imgbbData.append('key', apiKey);
+    imgbbData.append('image', base64Image);
 
-    const url = `/images/uploads/${filename}`;
+    const res = await fetch('https://api.imgbb.com/1/upload', {
+      method: 'POST',
+      body: imgbbData,
+    });
+
+    const json = await res.json();
+    if (!res.ok || !json.data || !json.data.url) {
+      console.error('ImgBB API error:', json);
+      return NextResponse.json({ error: 'Resim yükleme sunucusunda hata oluştu.' }, { status: 500 });
+    }
+
+    const url = json.data.url;
     return NextResponse.json({ success: true, url });
   } catch (error) {
     console.error('Upload error:', error);

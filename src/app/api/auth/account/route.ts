@@ -32,7 +32,7 @@ export async function PUT(request: NextRequest) {
 
     // Mevcut şifreyi doğrula
     const currentUsername = session.username as string;
-    const isValid = validateAdminPassword(currentUsername, currentPassword);
+    const isValid = await validateAdminPassword(currentUsername, currentPassword);
     if (!isValid) {
       return NextResponse.json(
         { error: 'Mevcut şifre hatalı.' },
@@ -42,7 +42,7 @@ export async function PUT(request: NextRequest) {
 
     // Yeni kullanıcı adı zaten var mı?
     if (newUsername !== currentUsername) {
-      const existing = getAdminByUsername(newUsername);
+      const existing = await getAdminByUsername(newUsername);
       if (existing) {
         return NextResponse.json(
           { error: 'Bu kullanıcı adı zaten kullanılıyor.' },
@@ -52,9 +52,9 @@ export async function PUT(request: NextRequest) {
     }
 
     // Güncelle
-    const result = updateAdminCredentials(currentUsername, newUsername, newPassword);
-    if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 500 });
+    const success = await updateAdminCredentials(currentUsername, newUsername, newPassword);
+    if (!success) {
+      return NextResponse.json({ error: 'Kullanıcı güncellenemedi.' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, message: 'Hesap bilgileri güncellendi.' });

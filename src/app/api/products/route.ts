@@ -12,10 +12,10 @@ export async function GET(request: NextRequest) {
     if (admin === 'true') {
       const session = await getSession();
       if (!session) return NextResponse.json({ error: 'Yetkisiz erişim.' }, { status: 401 });
-      return NextResponse.json(getAllProductsAdmin());
+      return NextResponse.json(await getAllProductsAdmin());
     }
 
-    let products = getAllProducts() as Record<string, unknown>[];
+    let products = await getAllProducts() as Record<string, unknown>[];
 
     if (category) {
       products = products.filter(p => p.category === category);
@@ -45,8 +45,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Marka bilgisi zorunludur.' }, { status: 400 });
     }
 
-    const result = createProduct(data);
-    return NextResponse.json({ success: true, id: result.lastInsertRowid });
+    const id = await createProduct(data);
+    return NextResponse.json({ success: true, id });
   } catch (error) {
     console.error('Products POST error:', error);
     return NextResponse.json({ error: 'Ürün eklenemedi.' }, { status: 500 });

@@ -16,10 +16,10 @@ export async function GET(request: NextRequest) {
       if (!session) {
         return NextResponse.json({ error: 'Yetkisiz erişim.' }, { status: 401 });
       }
-      return NextResponse.json(getAllSeoContentAdmin());
+      return NextResponse.json(await getAllSeoContentAdmin());
     }
 
-    return NextResponse.json(getAllSeoContent());
+    return NextResponse.json(await getAllSeoContent());
   } catch (error) {
     console.error('SEO Content GET error:', error);
     return NextResponse.json({ error: 'İçerik yüklenemedi.' }, { status: 500 });
@@ -39,8 +39,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Başlık ve içerik zorunludur.' }, { status: 400 });
     }
 
-    const result = createSeoContent(data);
-    return NextResponse.json({ success: true, id: result.lastInsertRowid });
+    const id = await createSeoContent(data);
+    return NextResponse.json({ success: true, id });
   } catch (error) {
     console.error('SEO Content POST error:', error);
     return NextResponse.json({ error: 'İçerik eklenemedi.' }, { status: 500 });
@@ -61,7 +61,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const { id, ...rest } = data;
-    updateSeoContent(id, rest);
+    await updateSeoContent(id, rest);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('SEO Content PUT error:', error);
@@ -83,7 +83,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'ID zorunludur.' }, { status: 400 });
     }
 
-    deleteSeoContent(Number(id));
+    await deleteSeoContent(Number(id));
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('SEO Content DELETE error:', error);

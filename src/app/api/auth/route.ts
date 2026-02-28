@@ -13,12 +13,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Kullanıcı adı ve şifre gereklidir.' }, { status: 400 });
     }
 
-    const isValid = validateAdminPassword(username, password);
+    const isValid = await validateAdminPassword(username, password);
     if (!isValid) {
       return NextResponse.json({ error: 'Geçersiz kullanıcı adı veya şifre.' }, { status: 401 });
     }
 
-    const admin = getAdminByUsername(username);
+    const admin = await getAdminByUsername(username);
     if (!admin) {
       return NextResponse.json({ error: 'Kullanıcı bulunamadı.' }, { status: 401 });
     }
