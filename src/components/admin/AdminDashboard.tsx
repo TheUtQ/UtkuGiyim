@@ -280,7 +280,7 @@ export default function AdminDashboard({ username }: { username: string }) {
         {activeTab === 'products' && <ProductsTab products={products} brands={brands} categories={categories} onRefresh={fetchData} showToast={showToast} />}
         {activeTab === 'catalog' && <CatalogTab brands={brands} categories={categories} onRefresh={fetchData} showToast={showToast} />}
         {activeTab === 'seo' && <SeoTab seoContent={seoContent} onRefresh={fetchData} showToast={showToast} />}
-        {activeTab === 'settings' && <SettingsTab settings={settings} onRefresh={fetchData} showToast={showToast} />}
+        {activeTab === 'settings' && <SettingsTab settings={settings} onRefresh={fetchData} showToast={showToast} products={products} />}
       </main>
     </div>
   );
@@ -868,11 +868,12 @@ function SeoTab({
 
 /* ===== SETTINGS TAB ===== */
 function SettingsTab({
-  settings, onRefresh, showToast,
+  settings, onRefresh, showToast, products
 }: {
   settings: Record<string, string>;
   onRefresh: () => void;
   showToast: (msg: string, type?: 'success' | 'error') => void;
+  products: Product[];
 }) {
   const [formData, setFormData] = useState(settings);
   const [saving, setSaving] = useState(false);
@@ -891,12 +892,20 @@ function SettingsTab({
   const [specs, setSpecs] = useState<{ icon: string; text: string }[]>(
     () => parseJson('product_specs', [{ icon: '🛡️', text: 'UV Dayanımlı Kumaş' }])
   );
+  const [showcaseSele, setShowcaseSele] = useState<number[]>(
+    () => parseJson('showcase_sele', [])
+  );
+  const [showcaseVites, setShowcaseVites] = useState<number[]>(
+    () => parseJson('showcase_vites', [])
+  );
 
   useEffect(() => {
     setFormData(settings);
     try { setVisionCards(JSON.parse(settings.vision_cards || '[]')); } catch { /* no-op */ }
     try { setVisionLines(JSON.parse(settings.vision_lines || '[]')); } catch { /* no-op */ }
     try { setSpecs(JSON.parse(settings.product_specs || '[]')); } catch { /* no-op */ }
+    try { setShowcaseSele(JSON.parse(settings.showcase_sele || '[]')); } catch { /* no-op */ }
+    try { setShowcaseVites(JSON.parse(settings.showcase_vites || '[]')); } catch { /* no-op */ }
   }, [settings]);
 
   const handleSave = async () => {
@@ -906,6 +915,8 @@ function SettingsTab({
       vision_cards: JSON.stringify(visionCards),
       vision_lines: JSON.stringify(visionLines),
       product_specs: JSON.stringify(specs),
+      showcase_sele: JSON.stringify(showcaseSele.filter(Boolean)),
+      showcase_vites: JSON.stringify(showcaseVites.filter(Boolean)),
     };
     try {
       const res = await fetch('/api/settings', {
@@ -982,6 +993,55 @@ function SettingsTab({
               </button>
             </div>
           ))}
+
+          {/* Showcase Multi-Select for Sele Kılıfı */}
+          {formData.show_sele_collection !== '0' && (
+            <div style={{ padding: '1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '10px', marginTop: '0.5rem' }}>
+              <p style={{ fontSize: '0.85rem', color: '#fff', marginBottom: '0.75rem', fontWeight: 600 }}>Sele Kılıfı Vitrin Ürünleri (Maks. 5)</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem' }}>
+                {[0, 1, 2, 3, 4].map((index) => (
+                  <AdminSelect
+                    key={index}
+                    value={String(showcaseSele[index] || '')}
+                    onChange={(v) => {
+                      const newArr = [...showcaseSele];
+                      newArr[index] = v ? Number(v) : 0;
+                      setShowcaseSele(newArr);
+                    }}
+                    options={[
+                      { value: '', label: 'Seçili Değil' },
+                      ...products.filter(p => p.category === 'sele-kilifi').map(p => ({ value: String(p.id), label: p.title }))
+                    ]}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Showcase Multi-Select for Vites Sweatshirt */}
+          {formData.show_vites_collection !== '0' && (
+            <div style={{ padding: '1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '10px', marginTop: '0.5rem' }}>
+              <p style={{ fontSize: '0.85rem', color: '#fff', marginBottom: '0.75rem', fontWeight: 600 }}>Vites Sweatshirt Vitrin Ürünleri (Maks. 5)</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem' }}>
+                {[0, 1, 2, 3, 4].map((index) => (
+                  <AdminSelect
+                    key={index}
+                    value={String(showcaseVites[index] || '')}
+                    onChange={(v) => {
+                      const newArr = [...showcaseVites];
+                      newArr[index] = v ? Number(v) : 0;
+                      setShowcaseVites(newArr);
+                    }}
+                    options={[
+                      { value: '', label: 'Seçili Değil' },
+                      ...products.filter(p => p.category === 'vites-sweatshirt').map(p => ({ value: String(p.id), label: p.title }))
+                    ]}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
 

@@ -301,9 +301,26 @@ export default function LandingClient({ settings, seleProducts, vitesProducts, s
   const showSele = settings.show_sele_collection !== '0';
   const showVites = settings.show_vites_collection !== '0';
 
-  // Max 5 products per collection
-  const seleSlice = seleProducts.slice(0, 5);
-  const vitesSlice = vitesProducts.slice(0, 5);
+  // Read showcase IDs from settings
+  const showcaseSeleIds: number[] = (() => {
+    try { return JSON.parse(settings.showcase_sele || '[]'); } catch { return []; }
+  })();
+  const showcaseVitesIds: number[] = (() => {
+    try { return JSON.parse(settings.showcase_vites || '[]'); } catch { return []; }
+  })();
+
+  const getShowcaseProducts = (items: Product[], showcaseIds: number[]) => {
+    const ids = showcaseIds.filter(Boolean); // Remove 0s or nulls
+    if (ids.length > 0) {
+      // Find matching products and keep the selected order
+      return ids.map(id => items.find(p => p.id === id)).filter((p): p is Product => Boolean(p)).slice(0, 5);
+    }
+    return items.slice(0, 5);
+  };
+
+  // Max 5 products per collection, mapped by selected IDs if any exist
+  const seleSlice = getShowcaseProducts(seleProducts, showcaseSeleIds);
+  const vitesSlice = getShowcaseProducts(vitesProducts, showcaseVitesIds);
 
   /* Custom cursor */
   useEffect(() => {
