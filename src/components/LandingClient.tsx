@@ -457,7 +457,7 @@ export default function LandingClient({ settings, seleProducts, vitesProducts, s
       <section ref={heroRef} id="hero" style={{ position: 'relative', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
         <motion.div style={{ scale: heroScale, position: 'absolute', inset: 0, willChange: 'transform' }}>
           <Image
-            src="/images/hero/hero_moto_bg_1771774801552.png"
+            src="/images/hero/hero_light_trails.png"
             alt="Utku Giyim Premium Motosiklet Aksesuarları"
             fill priority
             style={{ objectFit: 'cover' }}
