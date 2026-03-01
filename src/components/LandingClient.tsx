@@ -20,6 +20,8 @@ interface Product {
   badge_type: string | null;
   shopier_link: string;
   trendyol_link: string;
+  is_showcase?: boolean;
+  showcase_order?: number;
 }
 
 interface SeoItem {
@@ -301,26 +303,19 @@ export default function LandingClient({ settings, seleProducts, vitesProducts, s
   const showSele = settings.show_sele_collection !== '0';
   const showVites = settings.show_vites_collection !== '0';
 
-  // Read showcase IDs from settings
-  const showcaseSeleIds: number[] = (() => {
-    try { return JSON.parse(settings.showcase_sele || '[]'); } catch { return []; }
-  })();
-  const showcaseVitesIds: number[] = (() => {
-    try { return JSON.parse(settings.showcase_vites || '[]'); } catch { return []; }
-  })();
-
-  const getShowcaseProducts = (items: Product[], showcaseIds: number[]) => {
-    const ids = showcaseIds.filter(Boolean); // Remove 0s or nulls
-    if (ids.length > 0) {
-      // Find matching products and keep the selected order
-      return ids.map(id => items.find(p => p.id === id)).filter((p): p is Product => Boolean(p)).slice(0, 5);
+  const getShowcaseProducts = (items: Product[]) => {
+    const showcaseItems = items
+      .filter(p => p.is_showcase)
+      .sort((a, b) => (a.showcase_order || 1) - (b.showcase_order || 1));
+    if (showcaseItems.length > 0) {
+      return showcaseItems.slice(0, 5);
     }
     return items.slice(0, 5);
   };
 
-  // Max 5 products per collection, mapped by selected IDs if any exist
-  const seleSlice = getShowcaseProducts(seleProducts, showcaseSeleIds);
-  const vitesSlice = getShowcaseProducts(vitesProducts, showcaseVitesIds);
+  // Max 5 products per collection
+  const seleSlice = getShowcaseProducts(seleProducts);
+  const vitesSlice = getShowcaseProducts(vitesProducts);
 
   /* Custom cursor */
   useEffect(() => {

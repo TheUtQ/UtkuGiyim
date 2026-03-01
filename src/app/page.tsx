@@ -21,6 +21,8 @@ export default async function HomePage() {
     badge_type: string | null;
     shopier_link: string;
     trendyol_link: string;
+    is_showcase?: boolean;
+    showcase_order?: number;
   }>;
   const settings = await getAllSettings();
   const seoContent = (await getAllSeoContent()) as unknown as Array<{

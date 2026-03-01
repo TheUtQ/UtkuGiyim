@@ -27,6 +27,8 @@ interface Product {
   trendyol_link: string;
   is_active: number;
   sort_order: number;
+  is_showcase: boolean;
+  showcase_order: number;
 }
 
 interface SeoItem {
@@ -487,7 +489,7 @@ function ProductsTab({
         <p style={{ color: C.muted, fontSize: '0.875rem' }}>{products.length} ürün listeleniyor</p>
         <AdminBtn
           onClick={() => {
-            setEditProduct({ title: '', slug: '', description: '', price: 0, category: categories[0]?.slug || 'sele-kilifi', brand_id: brands[0]?.id || null, image_url: '', badge: '', badge_type: null, shopier_link: '', trendyol_link: '', sort_order: 0, is_active: 1 });
+            setEditProduct({ title: '', slug: '', description: '', price: 0, category: categories[0]?.slug || 'sele-kilifi', brand_id: brands[0]?.id || null, image_url: '', badge: '', badge_type: null, shopier_link: '', trendyol_link: '', sort_order: 0, is_active: 1, is_showcase: false, showcase_order: 1 });
             setIsNew(true);
           }}
           icon={<Plus size={16} />}
@@ -540,6 +542,17 @@ function ProductsTab({
             </FormField>
             <FormField label="Durum">
               <AdminSelect value={String(editProduct.is_active ?? 1)} onChange={v => setEditProduct({ ...editProduct, is_active: parseInt(v) })} options={[{ value: '1', label: 'Aktif' }, { value: '0', label: 'Pasif' }]} />
+            </FormField>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <FormField label="Vitrinde Göster">
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', height: '100%' }}>
+                <input type="checkbox" checked={editProduct.is_showcase || false} onChange={e => setEditProduct({ ...editProduct, is_showcase: e.target.checked })} style={{ width: '1.25rem', height: '1.25rem', accentColor: C.red, cursor: 'pointer' }} />
+                <span style={{ fontSize: '0.875rem', color: '#fff' }}>Anasayfa koleksiyonunda göster</span>
+              </label>
+            </FormField>
+            <FormField label="Vitrin Sırası (1-5)">
+              <AdminInput value={String(editProduct.showcase_order || 1)} onChange={v => setEditProduct({ ...editProduct, showcase_order: parseInt(v) || 1 })} type="number" />
             </FormField>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
@@ -892,20 +905,12 @@ function SettingsTab({
   const [specs, setSpecs] = useState<{ icon: string; text: string }[]>(
     () => parseJson('product_specs', [{ icon: '🛡️', text: 'UV Dayanımlı Kumaş' }])
   );
-  const [showcaseSele, setShowcaseSele] = useState<number[]>(
-    () => parseJson('showcase_sele', [])
-  );
-  const [showcaseVites, setShowcaseVites] = useState<number[]>(
-    () => parseJson('showcase_vites', [])
-  );
 
   useEffect(() => {
     setFormData(settings);
     try { setVisionCards(JSON.parse(settings.vision_cards || '[]')); } catch { /* no-op */ }
     try { setVisionLines(JSON.parse(settings.vision_lines || '[]')); } catch { /* no-op */ }
     try { setSpecs(JSON.parse(settings.product_specs || '[]')); } catch { /* no-op */ }
-    try { setShowcaseSele(JSON.parse(settings.showcase_sele || '[]')); } catch { /* no-op */ }
-    try { setShowcaseVites(JSON.parse(settings.showcase_vites || '[]')); } catch { /* no-op */ }
   }, [settings]);
 
   const handleSave = async () => {
@@ -915,8 +920,6 @@ function SettingsTab({
       vision_cards: JSON.stringify(visionCards),
       vision_lines: JSON.stringify(visionLines),
       product_specs: JSON.stringify(specs),
-      showcase_sele: JSON.stringify(showcaseSele.filter(Boolean)),
-      showcase_vites: JSON.stringify(showcaseVites.filter(Boolean)),
     };
     try {
       const res = await fetch('/api/settings', {
@@ -993,55 +996,6 @@ function SettingsTab({
               </button>
             </div>
           ))}
-
-          {/* Showcase Multi-Select for Sele Kılıfı */}
-          {formData.show_sele_collection !== '0' && (
-            <div style={{ padding: '1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '10px', marginTop: '0.5rem' }}>
-              <p style={{ fontSize: '0.85rem', color: '#fff', marginBottom: '0.75rem', fontWeight: 600 }}>Sele Kılıfı Vitrin Ürünleri (Maks. 5)</p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem' }}>
-                {[0, 1, 2, 3, 4].map((index) => (
-                  <AdminSelect
-                    key={index}
-                    value={String(showcaseSele[index] || '')}
-                    onChange={(v) => {
-                      const newArr = [...showcaseSele];
-                      newArr[index] = v ? Number(v) : 0;
-                      setShowcaseSele(newArr);
-                    }}
-                    options={[
-                      { value: '', label: 'Seçili Değil' },
-                      ...products.filter(p => p.category === 'sele-kilifi').map(p => ({ value: String(p.id), label: p.title }))
-                    ]}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Showcase Multi-Select for Vites Sweatshirt */}
-          {formData.show_vites_collection !== '0' && (
-            <div style={{ padding: '1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '10px', marginTop: '0.5rem' }}>
-              <p style={{ fontSize: '0.85rem', color: '#fff', marginBottom: '0.75rem', fontWeight: 600 }}>Vites Sweatshirt Vitrin Ürünleri (Maks. 5)</p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem' }}>
-                {[0, 1, 2, 3, 4].map((index) => (
-                  <AdminSelect
-                    key={index}
-                    value={String(showcaseVites[index] || '')}
-                    onChange={(v) => {
-                      const newArr = [...showcaseVites];
-                      newArr[index] = v ? Number(v) : 0;
-                      setShowcaseVites(newArr);
-                    }}
-                    options={[
-                      { value: '', label: 'Seçili Değil' },
-                      ...products.filter(p => p.category === 'vites-sweatshirt').map(p => ({ value: String(p.id), label: p.title }))
-                    ]}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
         </div>
       </div>
 

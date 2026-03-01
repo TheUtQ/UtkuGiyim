@@ -214,6 +214,8 @@ export async function createProduct(data: {
   shopier_link?: string;
   trendyol_link?: string;
   sort_order?: number;
+  is_showcase?: boolean;
+  showcase_order?: number;
 }) {
   const id = await getNextId("products");
   await db.collection("products").doc(id.toString()).set({
@@ -228,6 +230,8 @@ export async function createProduct(data: {
     shopier_link: data.shopier_link || "",
     trendyol_link: data.trendyol_link || "",
     sort_order: data.sort_order || 0,
+    is_showcase: data.is_showcase || false,
+    showcase_order: data.showcase_order || 1,
     is_active: 1,
     created_at: admin.firestore.FieldValue.serverTimestamp(),
     updated_at: admin.firestore.FieldValue.serverTimestamp()
