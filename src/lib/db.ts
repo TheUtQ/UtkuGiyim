@@ -9,12 +9,22 @@ import bcryptjs from "bcryptjs";
 if (!admin.apps.length) {
   try {
     let privateKey = process.env.FIREBASE_PRIVATE_KEY || '';
-    // Strip surrounding quotes if accidentally included via Vercel Dashboard
-    if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
-      privateKey = privateKey.slice(1, -1);
-    }
-    // Convert literal \n to actual newlines
+    
+    // 1. Remove all quotes
+    privateKey = privateKey.replace(/"/g, '');
+    
+    // 2. Replace literal \n with actual newlines
     privateKey = privateKey.replace(/\\n/g, '\n');
+    
+    // 3. Fix potential spacing issues (if newlines were replaced by spaces during copy-paste)
+    const header = '-----BEGIN PRIVATE KEY-----';
+    const footer = '-----END PRIVATE KEY-----';
+    if (privateKey.includes(header) && privateKey.includes(footer)) {
+      let core = privateKey.substring(privateKey.indexOf(header) + header.length, privateKey.indexOf(footer));
+      core = core.replace(/\s+/g, '\n'); // all spaces to newlines
+      // ensure exactly one newline after header and before footer
+      privateKey = `${header}\n${core.trim()}\n${footer}`;
+    }
 
     admin.initializeApp({
       credential: admin.credential.cert({
