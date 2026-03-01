@@ -304,13 +304,10 @@ export default function LandingClient({ settings, seleProducts, vitesProducts, s
   const showVites = settings.show_vites_collection !== '0';
 
   const getShowcaseProducts = (items: Product[]) => {
-    const showcaseItems = items
-      .filter(p => p.is_showcase)
-      .sort((a, b) => (a.showcase_order || 1) - (b.showcase_order || 1));
-    if (showcaseItems.length > 0) {
-      return showcaseItems.slice(0, 5);
-    }
-    return items.slice(0, 5);
+    return items
+      .filter(p => Number(p.is_showcase) === 1 || p.is_showcase === true)
+      .sort((a, b) => (Number(a.showcase_order) || 1) - (Number(b.showcase_order) || 1))
+      .slice(0, 5);
   };
 
   // Max 5 products per collection
