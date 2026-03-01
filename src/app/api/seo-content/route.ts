@@ -5,6 +5,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAllSeoContent, getAllSeoContentAdmin, createSeoContent, updateSeoContent, deleteSeoContent } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 // GET - Fetch all SEO content
 export async function GET(request: NextRequest) {
   try {

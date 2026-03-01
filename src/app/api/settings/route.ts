@@ -5,6 +5,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAllSettings, updateSetting } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 // GET - Fetch all settings (public)
 export async function GET() {
   try {
