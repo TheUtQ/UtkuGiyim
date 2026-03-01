@@ -8,7 +8,14 @@ import bcryptjs from "bcryptjs";
 // Initialize Firebase Admin
 if (!admin.apps.length) {
   try {
-    const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+    let privateKey = process.env.FIREBASE_PRIVATE_KEY || '';
+    // Strip surrounding quotes if accidentally included via Vercel Dashboard
+    if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+      privateKey = privateKey.slice(1, -1);
+    }
+    // Convert literal \n to actual newlines
+    privateKey = privateKey.replace(/\\n/g, '\n');
+
     admin.initializeApp({
       credential: admin.credential.cert({
         projectId: process.env.FIREBASE_PROJECT_ID,
