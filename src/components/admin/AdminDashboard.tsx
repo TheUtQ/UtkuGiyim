@@ -105,6 +105,22 @@ function Toast({ message, type, onClose }: { message: string; type: 'success' | 
 }
 
 /* ===== Main Dashboard ===== */
+function toSlug(text: string) {
+  return text
+    .toString()
+    .toLowerCase()
+    .replace(/ç/g, 'c')
+    .replace(/ğ/g, 'g')
+    .replace(/ı/g, 'i')
+    .replace(/ö/g, 'o')
+    .replace(/ş/g, 's')
+    .replace(/ü/g, 'u')
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]+/g, '')
+    .replace(/--+/g, '-')
+    .trim();
+}
+
 export default function AdminDashboard({ username }: { username: string }) {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [products, setProducts] = useState<Product[]>([]);
@@ -502,10 +518,16 @@ function ProductsTab({
         <Modal title={isNew ? 'Yeni Ürün Ekle' : 'Ürünü Düzenle'} onClose={() => { setEditProduct(null); setIsNew(false); }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <FormField label="Başlık *">
-              <AdminInput value={editProduct.title || ''} onChange={v => setEditProduct({ ...editProduct, title: v })} placeholder="Ürün başlığı" />
+              <AdminInput 
+                 value={editProduct.title || ''} 
+                 onChange={v => {
+                    setEditProduct({ ...editProduct, title: v, slug: isNew ? toSlug(v) : editProduct.slug });
+                 }} 
+                 placeholder="Ürün başlığı" 
+              />
             </FormField>
-            <FormField label="Slug *">
-              <AdminInput value={editProduct.slug || ''} onChange={v => setEditProduct({ ...editProduct, slug: v })} placeholder="urun-slug" />
+            <FormField label="Slug * (Otomatik İngilizce Karakter)">
+              <AdminInput value={editProduct.slug || ''} onChange={v => setEditProduct({ ...editProduct, slug: toSlug(v) })} placeholder="urun-slug" />
             </FormField>
           </div>
           <FormField label="Açıklama">
@@ -694,8 +716,8 @@ function CatalogTab({
         {editBrand && (
           <div style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: '14px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
             <p style={{ fontWeight: 700, color: '#fff', fontSize: '0.9rem' }}>{isNewBrand ? '+ Yeni Marka' : 'Markayı Düzenle'}</p>
-            <FormField label="Marka Adı *"><AdminInput value={editBrand.name || ''} onChange={v => setEditBrand({ ...editBrand, name: v })} placeholder="Utku Giyim" /></FormField>
-            <FormField label="Slug *"><AdminInput value={editBrand.slug || ''} onChange={v => setEditBrand({ ...editBrand, slug: v })} placeholder="utku-giyim" /></FormField>
+            <FormField label="Marka Adı *"><AdminInput value={editBrand.name || ''} onChange={v => setEditBrand({ ...editBrand, name: v, slug: isNewBrand ? toSlug(v) : editBrand.slug })} placeholder="Utku Giyim" /></FormField>
+            <FormField label="Slug * (Oto. Düzeltme)"><AdminInput value={editBrand.slug || ''} onChange={v => setEditBrand({ ...editBrand, slug: toSlug(v) })} placeholder="utku-giyim" /></FormField>
             <FormField label="Açıklama"><AdminInput value={editBrand.description || ''} onChange={v => setEditBrand({ ...editBrand, description: v })} placeholder="Kısa açıklama" multiline rows={2} /></FormField>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <AdminBtn onClick={handleSaveBrand} icon={<Save size={14} />} label={saving ? '...' : 'Kaydet'} disabled={saving} />
@@ -737,8 +759,8 @@ function CatalogTab({
         {editCat && (
           <div style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: '14px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
             <p style={{ fontWeight: 700, color: '#fff', fontSize: '0.9rem' }}>{isNewCat ? '+ Yeni Kategori' : 'Kategoriyi Düzenle'}</p>
-            <FormField label="Kategori Adı *"><AdminInput value={editCat.name || ''} onChange={v => setEditCat({ ...editCat, name: v })} placeholder="Sele Kılıfı" /></FormField>
-            <FormField label="Slug *"><AdminInput value={editCat.slug || ''} onChange={v => setEditCat({ ...editCat, slug: v })} placeholder="sele-kilifi" /></FormField>
+            <FormField label="Kategori Adı *"><AdminInput value={editCat.name || ''} onChange={v => setEditCat({ ...editCat, name: v, slug: isNewCat ? toSlug(v) : editCat.slug })} placeholder="Sele Kılıfı" /></FormField>
+            <FormField label="Slug * (Oto. Düzeltme)"><AdminInput value={editCat.slug || ''} onChange={v => setEditCat({ ...editCat, slug: toSlug(v) })} placeholder="sele-kilifi" /></FormField>
             <FormField label="Açıklama"><AdminInput value={editCat.description || ''} onChange={v => setEditCat({ ...editCat, description: v })} placeholder="Kısa açıklama" multiline rows={2} /></FormField>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <AdminBtn onClick={handleSaveCat} icon={<Save size={14} />} label={saving ? '...' : 'Kaydet'} disabled={saving} />
