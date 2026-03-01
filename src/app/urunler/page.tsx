@@ -6,6 +6,8 @@ export const metadata = {
   description: 'Premium motosiklet sele kılıfları ve vites sweatshirtleri. Marka ve kategoriye göre filtrele.',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function UrunlerPage() {
   const products = await getAllProducts();
   const brands = await getAllBrands();
