@@ -233,6 +233,7 @@ export async function createProduct(data: {
   sort_order?: number;
   is_showcase?: boolean;
   showcase_order?: number;
+  features?: string;
 }) {
   const id = await getNextId("products");
   await db.collection("products").doc(id.toString()).set({
@@ -249,6 +250,7 @@ export async function createProduct(data: {
     sort_order: data.sort_order || 0,
     is_showcase: data.is_showcase || false,
     showcase_order: data.showcase_order || 1,
+    features: data.features || JSON.stringify([{ icon: 'Shield', text: 'UV Dayanımlı' }, { icon: 'Droplets', text: 'Su Geçirmez' }, { icon: 'Zap', text: 'Kolay Montaj' }, { icon: 'Star', text: 'Premium Kalite' }]),
     is_active: 1,
     created_at: admin.firestore.FieldValue.serverTimestamp(),
     updated_at: admin.firestore.FieldValue.serverTimestamp()

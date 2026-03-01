@@ -23,6 +23,7 @@ interface Product {
   trendyol_link: string;
   sort_order: number;
   created_at: string;
+  features?: string;
 }
 
 const C = {
@@ -236,22 +237,33 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
             {/* Features */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.625rem' }}>
-              {[
-                { icon: <Shield size={15} />, text: 'UV Dayanımlı' },
-                { icon: <Droplets size={15} />, text: 'Su Geçirmez' },
-                { icon: <Zap size={15} />, text: 'Kolay Montaj' },
-                { icon: <Star size={15} />, text: 'Premium Kalite' },
-              ].map((feat, i) => (
-                <div key={i} style={{
-                  display: 'flex', alignItems: 'center', gap: '0.5rem',
-                  padding: '0.625rem 0.875rem', borderRadius: '10px',
-                  background: C.surface, border: `1px solid ${C.border}`,
-                  fontSize: '0.78rem', color: 'rgba(255,255,255,0.7)',
-                }}>
-                  <span style={{ color: C.red }}>{feat.icon}</span>
-                  {feat.text}
-                </div>
-              ))}
+              {(() => {
+                let currentFeatures: string[] = ['uv', 'water', 'install', 'premium'];
+                try {
+                   if (product.features) {
+                      currentFeatures = JSON.parse(product.features);
+                   }
+                } catch { /* default */ }
+                
+                const allFeatures = [
+                  { id: 'uv', icon: <Shield size={15} />, text: 'UV Dayanımlı' },
+                  { id: 'water', icon: <Droplets size={15} />, text: 'Su Geçirmez' },
+                  { id: 'install', icon: <Zap size={15} />, text: 'Kolay Montaj' },
+                  { id: 'premium', icon: <Star size={15} />, text: 'Premium Kalite' },
+                ];
+                
+                return allFeatures.filter(f => currentFeatures.includes(f.id)).map((feat, i) => (
+                  <div key={i} style={{
+                    display: 'flex', alignItems: 'center', gap: '0.5rem',
+                    padding: '0.625rem 0.875rem', borderRadius: '10px',
+                    background: C.surface, border: `1px solid ${C.border}`,
+                    fontSize: '0.78rem', color: 'rgba(255,255,255,0.7)',
+                  }}>
+                    <span style={{ color: C.red }}>{feat.icon}</span>
+                    {feat.text}
+                  </div>
+                ));
+              })()}
             </div>
 
             {/* CTA Buttons */}

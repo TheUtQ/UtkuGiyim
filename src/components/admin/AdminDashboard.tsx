@@ -29,6 +29,7 @@ interface Product {
   sort_order: number;
   is_showcase: boolean;
   showcase_order: number;
+  features?: string;
 }
 
 interface SeoItem {
@@ -505,7 +506,14 @@ function ProductsTab({
         <p style={{ color: C.muted, fontSize: '0.875rem' }}>{products.length} ürün listeleniyor</p>
         <AdminBtn
           onClick={() => {
-            setEditProduct({ title: '', slug: '', description: '', price: 0, category: categories[0]?.slug || 'sele-kilifi', brand_id: brands[0]?.id || null, image_url: '', badge: '', badge_type: null, shopier_link: '', trendyol_link: '', sort_order: 0, is_active: 1, is_showcase: false, showcase_order: 1 });
+            setEditProduct({ 
+              title: '', slug: '', description: '', price: 0, 
+              category: categories[0]?.slug || 'sele-kilifi', 
+              brand_id: brands[0]?.id || null, 
+              image_url: '', badge: '', badge_type: null, shopier_link: '', trendyol_link: '', 
+              sort_order: 0, is_active: 1, is_showcase: false, showcase_order: 1,
+              features: JSON.stringify(['uv', 'water', 'install', 'premium'])
+            });
             setIsNew(true);
           }}
           icon={<Plus size={16} />}
@@ -585,6 +593,37 @@ function ProductsTab({
               <AdminInput value={editProduct.trendyol_link || ''} onChange={v => setEditProduct({ ...editProduct, trendyol_link: v })} placeholder="https://trendyol.com/..." />
             </FormField>
           </div>
+          <FormField label="Ürün Özellikleri (Vitrinde Gözükecekler)">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', background: C.bg2, padding: '1rem', borderRadius: '12px', border: `1px solid ${C.border}` }}>
+              {[
+                 { id: 'uv', label: 'UV Dayanımlı' },
+                 { id: 'water', label: 'Su Geçirmez' },
+                 { id: 'install', label: 'Kolay Montaj' },
+                 { id: 'premium', label: 'Premium Kalite' },
+              ].map(f => {
+                const currentFeatures: string[] = (() => {
+                  try { return JSON.parse(editProduct.features || '[]'); } catch { return ['uv', 'water', 'install', 'premium']; }
+                })();
+                const isSelected = currentFeatures.includes(f.id);
+                return (
+                  <label key={f.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', color: '#fff', fontSize: '0.85rem' }}>
+                    <input 
+                      type="checkbox" 
+                      checked={isSelected} 
+                      onChange={(e) => {
+                        const newFeatures = e.target.checked 
+                           ? [...currentFeatures, f.id] 
+                           : currentFeatures.filter(id => id !== f.id);
+                        setEditProduct({ ...editProduct, features: JSON.stringify(newFeatures) });
+                      }}
+                      style={{ accentColor: C.red, width: '1rem', height: '1rem', cursor: 'pointer' }} 
+                    />
+                    {f.label}
+                  </label>
+                );
+              })}
+            </div>
+          </FormField>
           {/* Image Upload */}
           <FormField label="Ürün Görseli">
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
