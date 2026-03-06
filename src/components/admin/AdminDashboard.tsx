@@ -439,6 +439,75 @@ function ProductsTab({
   const [isNew, setIsNew] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [bulkProducts, setBulkProducts] = useState<Partial<Product>[] | null>(null);
+
+  const handleBulkImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length) return;
+    const files = Array.from(e.target.files);
+    
+    setUploading(true);
+    const newProducts: Partial<Product>[] = [];
+    
+    for (const file of files) {
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch('/api/upload', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.url) {
+          const defaultCat = categories[0]?.slug || 'sele-kilifi';
+          const defaultBrand = brands[0]?.id || null;
+          newProducts.push({
+            title: '', slug: '', description: '', price: 0, 
+            category: defaultCat, 
+            brand_id: defaultBrand, 
+            image_url: data.url, badge: '', badge_type: null, shopier_link: '', trendyol_link: '', 
+            sort_order: 0, is_active: 1, is_showcase: false, showcase_order: 1,
+            features: JSON.stringify(['uv', 'water', 'install', 'premium'])
+          });
+        }
+      } catch (err) {
+        showToast(`Görsel yüklenemedi: ${file.name}`, 'error');
+      }
+    }
+    setUploading(false);
+    if (newProducts.length > 0) {
+      setBulkProducts(newProducts);
+    }
+    // reset input
+    e.target.value = '';
+  };
+
+  const handleBulkSave = async () => {
+    if (!bulkProducts) return;
+    for (const p of bulkProducts) {
+      if (!p.title || !p.slug || !p.category || !p.brand_id) {
+        showToast('Tüm ürünler için Başlık, Slug, Kategori ve Marka zorunludur.', 'error');
+        return;
+      }
+    }
+    
+    setSaving(true);
+    let successCount = 0;
+    try {
+      for (const p of bulkProducts) {
+        const res = await fetch('/api/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(p),
+        });
+        if (res.ok) {
+          successCount++;
+        }
+      }
+      showToast(`${successCount} ürün başarıyla eklendi!`);
+      setBulkProducts(null);
+      onRefresh();
+    } catch {
+      showToast('Sunucu hatası.', 'error');
+    }
+    setSaving(false);
+  };
 
   const handleImageUpload = async (file: File) => {
     setUploading(true);
@@ -504,22 +573,121 @@ function ProductsTab({
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <p style={{ color: C.muted, fontSize: '0.875rem' }}>{products.length} ürün listeleniyor</p>
-        <AdminBtn
-          onClick={() => {
-            setEditProduct({ 
-              title: '', slug: '', description: '', price: 0, 
-              category: categories[0]?.slug || 'sele-kilifi', 
-              brand_id: brands[0]?.id || null, 
-              image_url: '', badge: '', badge_type: null, shopier_link: '', trendyol_link: '', 
-              sort_order: 0, is_active: 1, is_showcase: false, showcase_order: 1,
-              features: JSON.stringify(['uv', 'water', 'install', 'premium'])
-            });
-            setIsNew(true);
-          }}
-          icon={<Plus size={16} />}
-          label="Yeni Ürün"
-        />
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.625rem 1.25rem', borderRadius: '10px', fontFamily: '"Outfit", sans-serif', fontWeight: 600, fontSize: '0.85rem', letterSpacing: '0.04em', textTransform: 'uppercase', cursor: uploading ? 'not-allowed' : 'pointer', transition: 'all 0.2s ease', background: 'transparent', color: C.text, border: `1px solid ${C.border}`, opacity: uploading ? 0.5 : 1 }}>
+            <Upload size={16} />
+            {uploading ? 'Yükleniyor...' : 'Toplu Ürün Ekle'}
+            <input type="file" multiple accept="image/*" style={{ display: 'none' }} onChange={handleBulkImageSelect} disabled={uploading} />
+          </label>
+          <AdminBtn
+            onClick={() => {
+              setEditProduct({ 
+                title: '', slug: '', description: '', price: 0, 
+                category: categories[0]?.slug || 'sele-kilifi', 
+                brand_id: brands[0]?.id || null, 
+                image_url: '', badge: '', badge_type: null, shopier_link: '', trendyol_link: '', 
+                sort_order: 0, is_active: 1, is_showcase: false, showcase_order: 1,
+                features: JSON.stringify(['uv', 'water', 'install', 'premium'])
+              });
+              setIsNew(true);
+            }}
+            icon={<Plus size={16} />}
+            label="Yeni Ürün"
+          />
+        </div>
       </div>
+
+      {bulkProducts ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: C.bg2, padding: '1.5rem', borderRadius: '16px', border: `1px solid ${C.border}` }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${C.border}`, paddingBottom: '1rem' }}>
+            <h3 style={{ fontFamily: '"Outfit", sans-serif', fontWeight: 700, fontSize: '1.25rem', color: '#fff' }}>
+              Toplu Ürün Ekleme ({bulkProducts.length} Ürün)
+            </h3>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <AdminBtn onClick={handleBulkSave} icon={<Save size={15}/>} label={saving ? 'Kaydediliyor...' : 'Tümünü Kaydet'} disabled={saving} />
+              <AdminBtn onClick={() => setBulkProducts(null)} label="İptal" secondary />
+            </div>
+          </div>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxHeight: '600px', overflowY: 'auto', paddingRight: '0.5rem' }}>
+            {bulkProducts.map((bp, bpIndex) => (
+               <div key={bpIndex} style={{ background: C.surface, padding: '1.25rem', borderRadius: '12px', border: `1px solid ${C.border}`, display: 'flex', gap: '1.25rem' }}>
+                 <div style={{ width: '140px', height: '140px', borderRadius: '10px', background: C.bg, overflow: 'hidden', position: 'relative', flexShrink: 0, border: `1px solid ${C.border}` }}>
+                   <Image src={bp.image_url!} alt="Önizleme" fill style={{ objectFit: 'contain' }} />
+                 </div>
+                 
+                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                      <FormField label="Başlık *">
+                        <AdminInput value={bp.title || ''} onChange={v => {
+                          const newBulk = [...bulkProducts];
+                          newBulk[bpIndex] = { ...newBulk[bpIndex], title: v, slug: toSlug(v) };
+                          setBulkProducts(newBulk);
+                        }} placeholder="Ürün başlığı" />
+                      </FormField>
+                      <FormField label="Slug *">
+                        <AdminInput value={bp.slug || ''} onChange={v => {
+                           const newBulk = [...bulkProducts];
+                           newBulk[bpIndex] = { ...newBulk[bpIndex], slug: toSlug(v) };
+                           setBulkProducts(newBulk);
+                        }} placeholder="urun-slug" />
+                      </FormField>
+                   </div>
+                   
+                   <FormField label="Açıklama">
+                      <AdminInput value={bp.description || ''} onChange={v => {
+                        const newBulk = [...bulkProducts];
+                        newBulk[bpIndex] = { ...newBulk[bpIndex], description: v };
+                        setBulkProducts(newBulk);
+                      }} placeholder="Açıklama" multiline rows={2} />
+                   </FormField>
+                   
+                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                      <FormField label="Fiyat (₺)">
+                        <AdminInput value={String(bp.price || 0)} onChange={v => {
+                          const newBulk = [...bulkProducts];
+                          newBulk[bpIndex] = { ...newBulk[bpIndex], price: parseFloat(v) || 0 };
+                          setBulkProducts(newBulk);
+                        }} type="number" />
+                      </FormField>
+                      <FormField label="Marka *">
+                        <AdminSelect
+                          value={String(bp.brand_id || '')}
+                          onChange={v => {
+                            const newBulk = [...bulkProducts];
+                            newBulk[bpIndex] = { ...newBulk[bpIndex], brand_id: parseInt(v) || null };
+                            setBulkProducts(newBulk);
+                          }}
+                          options={[{ value: '', label: '-- Seç --' }, ...brands.map(b => ({ value: String(b.id), label: b.name }))]}
+                        />
+                      </FormField>
+                      <FormField label="Kategori *">
+                        <AdminSelect
+                          value={bp.category || 'sele-kilifi'}
+                          onChange={v => {
+                            const newBulk = [...bulkProducts];
+                            newBulk[bpIndex] = { ...newBulk[bpIndex], category: v };
+                            setBulkProducts(newBulk);
+                          }}
+                          options={categories.length > 0 ? categories.map(c => ({ value: c.slug, label: c.name })) : [{ value: 'sele-kilifi', label: 'Sele Kılıfı' }]}
+                        />
+                      </FormField>
+                   </div>
+                 </div>
+                 
+                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                   <IconBtn icon={<Trash2 size={16} />} onClick={() => {
+                     const newBulk = [...bulkProducts];
+                     newBulk.splice(bpIndex, 1);
+                     setBulkProducts(newBulk.length ? newBulk : null);
+                   }} title="Listeden Çıkar" danger />
+                 </div>
+               </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <>
 
       {/* Edit Modal */}
       {editProduct && (
@@ -678,11 +846,14 @@ function ProductsTab({
             <div style={{ display: 'flex', gap: '0.25rem' }}>
               <IconBtn icon={<Pencil size={15} />} onClick={() => { setEditProduct(product); setIsNew(false); }} title="Düzenle" />
               <IconBtn icon={<Trash2 size={15} />} onClick={() => handleDelete(product.id)} title="Sil" danger />
-            </div>
-          </div>
+             </div>
+           </div>
         ))}
       </div>
+      </>
+      )}
     </div>
+
   );
 }
 
