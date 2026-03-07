@@ -353,7 +353,7 @@ function SideLink({ icon, label, onClick, href, danger }: { icon: React.ReactNod
 /* ===== OVERVIEW TAB ===== */
 function OverviewTab({ products, seoContent }: { products: Product[]; seoContent: SeoItem[] }) {
   const seleCount = products.filter(p => p.category === 'sele-kilifi').length;
-  const vitesCount = products.filter(p => p.category === 'vites-sweatshirt').length;
+  const vitesCount = products.filter(p => p.category === 'vites-poları').length;
 
   const stats = [
     { label: 'Toplam Ürün', value: products.length, icon: <Package size={22} />, color: C.red, bg: 'rgba(230,51,41,0.12)' },
@@ -726,7 +726,7 @@ function ProductsTab({
                 onChange={v => setEditProduct({ ...editProduct, category: v })}
                 options={categories.length > 0
                   ? categories.map(c => ({ value: c.slug, label: c.name }))
-                  : [{ value: 'sele-kilifi', label: 'Sele Kılıfı' }, { value: 'vites-sweatshirt', label: 'Vites Sweatshirt' }]
+                  : [{ value: 'sele-kilifi', label: 'Sele Kılıfı' }, { value: 'vites-poları', label: 'Vites Sweatshirt' }]
                 }
               />
             </FormField>
