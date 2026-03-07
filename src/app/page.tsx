@@ -2,10 +2,10 @@
  * Utku Giyim — Premium Landing Page (Server Component)
  * Fetches data from DB and passes to client sections
  */
-import { getAllProducts, getAllSettings, getAllSeoContent } from '@/lib/db';
-import LandingClient from '@/components/LandingClient';
+import { getAllProducts, getAllSettings, getAllSeoContent } from "@/lib/db";
+import LandingClient from "@/components/LandingClient";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const products = (await getAllProducts()) as unknown as Array<{
@@ -31,38 +31,40 @@ export default async function HomePage() {
     content: string;
   }>;
 
-  const seleProducts = products.filter(p => p.category === 'sele-kilifi');
-  const vitesProducts = products.filter(p => p.category === 'vites-sweatshirt');
-
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Store",
-    "name": "Utku Giyim",
-    "description": "Premium motosiklet sele kılıfları ve vites sweatshirtleri",
-    "url": "https://utkugiyim.com",
-    "telephone": settings.phone,
-    "email": settings.email,
-    "address": {
+    name: "Utku Giyim",
+    description: "Premium motosiklet sele kılıfları ve vites sweatshirtleri",
+    url: "https://utkugiyim.com",
+    telephone: settings.phone,
+    email: settings.email,
+    address: {
       "@type": "PostalAddress",
-      "addressLocality": settings.address
+      addressLocality: settings.address,
     },
-    "sameAs": [settings.instagram, settings.tiktok, settings.facebook].filter(Boolean),
-    "hasOfferCatalog": {
+    sameAs: [settings.instagram, settings.tiktok, settings.facebook].filter(
+      Boolean,
+    ),
+    hasOfferCatalog: {
       "@type": "OfferCatalog",
-      "name": "Ürünler",
-      "itemListElement": products.map(p => ({
+      name: "Ürünler",
+      itemListElement: products.map((p) => ({
         "@type": "Product",
-        "name": p.title,
-        "description": p.description,
-        "image": p.image_url,
-        "offers": {
+        name: p.title,
+        description: p.description,
+        image: p.image_url,
+        offers: {
           "@type": "Offer",
-          "price": p.price,
-          "priceCurrency": "TRY"
-        }
-      }))
-    }
+          price: p.price,
+          priceCurrency: "TRY",
+        },
+      })),
+    },
   };
+
+  const seleProducts = products.filter((p) => p.category === "sele-kilifi");
+  const vitesProducts = products.filter((p) => p.category === "vites-poları");
 
   return (
     <>
